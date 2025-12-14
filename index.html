@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المرشد في الزيارة الإشرافية</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Tajawal', sans-serif; }
+        
+        /* Print Styles */
+        @media print {
+            @page { margin: 0.5cm; }
+            body { -webkit-print-color-adjust: exact; background: white; }
+            .print-hidden { display: none !important; }
+            
+            /* Custom Select styling for print */
+            select {
+                appearance: none;
+                border: none;
+                background: transparent !important;
+                padding: 0 2px;
+                font-weight: bold;
+                color: #111827 !important;
+                text-decoration: underline;
+                text-underline-offset: 4px;
+                width: auto;
+                display: inline-block;
+            }
+            select::-ms-expand { display: none; }
+            
+            input {
+                border: none;
+                border-bottom: 1px solid #ddd;
+                border-radius: 0;
+                padding: 0;
+            }
+            
+            textarea {
+                resize: none;
+                border: 1px solid #e5e7eb;
+                min-height: 80px;
+            }
+            
+            .shadow-sm { box-shadow: none !important; }
+            .border { border-color: #e5e7eb !important; }
+            
+            /* Ensure Rating Badge prints clearly */
+            .rating-badge {
+                border: 2px solid #000;
+                color: #000 !important;
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            /* Ensure Summary Table prints nicely */
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #000 !important; padding: 8px; }
+            thead { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
+        }
+        
+        /* Utility for Select visual state */
+        .select-filled {
+            background-color: #eef2ff;
+            border-color: #a5b4fc;
+            color: #3730a3;
+        }
+        .select-empty {
+            background-color: white;
+            border-color: #d1d5db;
+            color: #6b7280;
+        }
+
+        /* Rating Badge Animation */
+        .rating-badge {
+            transition: all 0.3s ease;
+        }
+        
+        /* Save Status Indicator */
+        #save-status {
+            transition: opacity 0.5s ease;
+        }
+
+        /* Modal Styles */
+        .modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .modal:not(.hidden) {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-right pb-20">
+
+    <!-- Header -->
+    <header class="bg-white border-b shadow-sm sticky top-0 z-50 print:static print:shadow-none print:border-none">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
+                    <i data-lucide="file-text"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">المرشد في الزيارات الإشرافية</h1>
+                    <div class="flex items-center gap-2">
+                        <p class="text-xs text-gray-500 hidden sm:block">نظام التقييم الإلكتروني</p>
+                        <span id="save-status" class="text-xs text-emerald-600 font-bold opacity-0 transition-opacity duration-500">
+                            <i data-lucide="check" class="inline w-3 h-3"></i> تم الحفظ
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions Toolbar -->
+            <div class="flex flex-wrap gap-2 print-hidden">
+                <button onclick="createNewVisit()" class="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg transition-colors text-sm font-medium">
+                    <i data-lucide="plus-circle" class="w-4 h-4 text-indigo-600"></i>
+                    <span>زيارة جديدة</span>
+                </button>
+
+                <button onclick="saveCurrentVisit()" class="flex items-center gap-2 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg transition-colors text-sm font-medium">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    <span>حفظ الزيارة</span>
+                </button>
+
+                <button onclick="toggleHistoryModal()" class="flex items-center gap-2 bg-gray-800 hover:bg-gray-900 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">
+                    <i data-lucide="history" class="w-4 h-4"></i>
+                    <span>سجل الزيارات</span>
+                </button>
+                
+                <div class="w-px h-8 bg-gray-300 mx-1 hidden sm:block"></div>
+
+                <button onclick="generateSummary()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">
+                    <i data-lucide="table" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">التقرير التجميعي</span>
+                </button>
+                <button onclick="window.print()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">طباعة</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-8 print:py-2">
+        
+        <!-- Hidden input to store visit ID if editing -->
+        <input type="hidden" id="visit_id" data-save-key="visit_id">
+
+        <!-- Basic Info Section -->
+        <section class="bg-white rounded-xl shadow-sm border p-6 mb-8 print:shadow-none print:border-gray-300 print:mb-4">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
+                <i data-lucide="school" class="text-indigo-500 w-5 h-5"></i>
+                بيانات الزيارة
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="basic-info-container">
+                <!-- Inputs generated by JS -->
+            </div>
+        </section>
+
+        <!-- Evaluation Domains Container -->
+        <div id="domains-container" class="space-y-6 print:space-y-4">
+            <!-- Content generated by JS -->
+        </div>
+
+        <!-- Summary Report Section (Hidden by default) -->
+        <div id="summary-section" class="hidden mt-12 bg-white rounded-xl shadow-sm border p-6 print:block print:shadow-none print:border-none print:mt-8 break-before-page">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-2">
+                <i data-lucide="clipboard-list" class="text-emerald-600 w-6 h-6"></i>
+                التقرير التجميعي للزيارة
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-right border-collapse">
+                    <thead class="bg-gray-100 text-gray-700 font-bold">
+                        <tr>
+                            <th class="border p-3 w-16 text-center">م</th>
+                            <th class="border p-3 w-1/4">البند</th>
+                            <th class="border p-3 w-16 text-center">التقدير</th>
+                            <th class="border p-3">الملاحظات (الإجادة / التطوير)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summary-table-body">
+                        <!-- Rows generated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer Signature Area (Print Only) -->
+        <div class="hidden print:flex mt-12 justify-between px-8">
+            <div class="text-center">
+                <p class="font-bold mb-8">توقيع المعلم</p>
+                <div class="w-48 border-b border-gray-400"></div>
+            </div>
+            <div class="text-center">
+                <p class="font-bold mb-8">توقيع المشرف/المدير</p>
+                <div class="w-48 border-b border-gray-400"></div>
+            </div>
+        </div>
+
+        <!-- Credits -->
+        <div class="mt-8 text-center text-gray-400 text-sm print-hidden flex flex-col gap-1">
+            <p>تم التصميم بناءً على نموذج: أ. سيف الندابي</p>
+            <p>تصميم وبرمجة: أ. عبدالله الرواحي</p>
+        </div>
+    </main>
+
+    <!-- History Modal -->
+    <div id="history-modal" class="modal hidden fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4 print-hidden">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i data-lucide="history" class="text-indigo-600"></i>
+                    سجل الزيارات السابقة
+                </h3>
+                <button onclick="toggleHistoryModal()" class="text-gray-500 hover:text-red-500 transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 bg-gray-50">
+                <div id="history-list-container" class="space-y-3">
+                    <!-- History items will be injected here -->
+                </div>
+                <div id="empty-history-msg" class="text-center py-12 hidden">
+                    <i data-lucide="file-x" class="w-12 h-12 text-gray-300 mx-auto mb-3"></i>
+                    <p class="text-gray-500">لا توجد زيارات محفوظة في السجل.</p>
+                </div>
+            </div>
+
+            <div class="p-4 border-t bg-white text-left">
+                <button onclick="toggleHistoryModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    إغلاق
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Data Definitions ---
+        const domains = [
+            {
+                title: "الإنجاز المدرسي",
+                colorClass: "bg-blue-50 border-blue-200",
+                icon: "school",
+                iconColor: "text-blue-600",
+                items: [
+                    {
+                        id: 1,
+                        name: "التحصيل الدراسي",
+                        desc: "تحصيل الطلبة في الأعمال الصفية وغير الصفية.",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يكتسب</span>
+                                ${createSelect(id, 'q1', ["جميع", "معظم", "أغلب", "قليل", "عدد نادر"])}
+                                <span>الطلبة المهارات الأساسية والمعارف في ضوء أهداف الدرس بصورة</span>
+                                ${createSelect(id, 'q2', ["فعالة", "فاعلة", "مقبولة", "محدودة", "نادرة"])}
+                                <span>.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "يكتسب الطلبة المهارات والمعارف بصورة واضحة، والدليل تفاعلهم العالي ونتائجهم في الأنشطة الصفية.",
+                            weak: "ضعف في اكتساب الطلبة للمهارات الأساسية، ويحتاج المعلم إلى تنويع الأنشطة لضمان وصول المعلومة للجميع."
+                        }
+                    },
+                    {
+                        id: 2,
+                        name: "التقدم الدراسي",
+                        desc: "التقدم الدراسي للطلبة بما فيهم الطلبة ذوي الإعاقة.",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يتقدم</span>
+                                ${createSelect(id, 'q1', ["جميع", "معظم", "أغلب", "قليل من", "عدد نادر من"])}
+                                <span>الطلبة دراسياً أثناء الحصة بما فيهم ذوي الإعاقة بصورة</span>
+                                ${createSelect(id, 'q2', ["متميزة", "فاعلة", "ملائمة", "محدودة", "محدودة جداً"])}
+                                <span>.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "يوجد تقدم ملموس في مستوى أداء الطلبة أثناء الحصة، والدليل إجاباتهم المتدرجة وتطور مستوى النقاش.",
+                            weak: "عدم وجود تقدم ملحوظ في مستوى الطلبة، ويحتاج المعلم لتفعيل التغذية الراجعة البنائية أثناء الحصة."
+                        }
+                    },
+                    {
+                        id: 3,
+                        name: "مهارات التعلم",
+                        desc: "تطبيق مهارات التعلم (الذاتي – التعاوني – الرقمي – التفكير العليا).",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يطبق</span>
+                                ${createSelect(id, 'q1', ["جميع", "معظم", "أغلب", "قليل", "عدد نادر من"])}
+                                <span>الطلبة مهارات التعلم والتفكير العليا بمستوى</span>
+                                ${createSelect(id, 'q2', ["متميز", "فاعل", "ملائم", "محدود", "نادر"])}
+                                <span>.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "تطبيق فعال لمهارات التعلم النشط ومهارات التفكير العليا، والدليل قدرة الطلبة على التحليل والاستنتاج.",
+                            weak: "محدودية في تطبيق مهارات التعلم، ويحتاج المعلم لدمج مهارات التفكير العليا في الأسئلة الصفية."
+                        }
+                    }
+                ]
+            },
+            {
+                title: "النمو الشخصي",
+                colorClass: "bg-emerald-50 border-emerald-200",
+                icon: "user",
+                iconColor: "text-emerald-600",
+                items: [
+                    {
+                        id: 4,
+                        name: "القيم والسلوك",
+                        desc: "تمسك الطلبة بالهوية العمانية والقيم الإنسانية.",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يلتزم</span>
+                                ${createSelect(id, 'q1', ["جميع", "معظم", "أغلب", "قليل من", "عدد محدود جدا من"])}
+                                <span>الطلبة بالقيم الإنسانية المشتركة ويراعون ذلك بمستوى</span>
+                                ${createSelect(id, 'q2', ["متميز", "فاعل", "ملائم", "محدود", "نادر"])}
+                                <span>.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "التزام واضح بالقيم والهوية العمانية، والدليل السلوك الحضاري والاحترام المتبادل بين الطلبة.",
+                            weak: "ضعف في تعزيز القيم، ويحتاج المعلم لربط موضوع الدرس بالقيم والهوية الوطنية."
+                        }
+                    }
+                ]
+            },
+            {
+                title: "مناخ المدرسة وبيئة التعلم",
+                colorClass: "bg-teal-50 border-teal-200",
+                icon: "check-circle",
+                iconColor: "text-teal-600",
+                items: [
+                    {
+                        id: 5,
+                        name: "جودة بيئة التعلم",
+                        desc: "متابعة جوانب الأمن والسلامة والنظافة في بيئة التعلم.",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يتابع المعلم جوانب الأمن والسلامة والنظافة بصورة</span>
+                                ${createSelect(id, 'q1', ["متميزة", "جيدة", "مناسبة", "محدودة", "نادرة"])}
+                                <span>.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "بيئة صفية جاذبة وآمنة، والدليل تنظيم المقاعد والوسائل بشكل يخدم الموقف التعليمي.",
+                            weak: "البيئة الصفية تحتاج إلى تنظيم أفضل ومتابعة أدق لجوانب النظافة والسلامة."
+                        }
+                    }
+                ]
+            },
+            {
+                title: "التدريس والتقويم",
+                colorClass: "bg-indigo-50 border-indigo-200",
+                icon: "book-open",
+                iconColor: "text-indigo-600",
+                items: [
+                    {
+                        id: 6,
+                        name: "تخطيط المنهاج الدراسي",
+                        desc: "تخطيط المناهج الدراسي لتحقيق نواتج التعلم.",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يخطط المعلم لجميع دروسه متسلسلاً ومحققاً لنواتج التعلم بصورة</span>
+                                ${createSelect(id, 'q1', ["متميزة", "جيدة", "مناسبة", "محدودة", "نادرة"])}
+                                <span>.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "تخطيط متقن للدرس وتسلسل منطقي للأفكار، والدليل سلاسة الانتقال بين عناصر الدرس وتحقيق الأهداف.",
+                            weak: "عشوائية في التخطيط، ويحتاج المعلم لإعداد ذهني وكتابي منظم يضمن تسلسل الأفكار."
+                        }
+                    },
+                    {
+                        id: 7,
+                        name: "إدارة الصف",
+                        desc: "فاعلية الإدارة الصفية (إدارة الزمن، السلوك، الدافعية).",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يدير المعلم زمن التعلم وسلوك طلبته ويثير دافعيتهم بصورة</span>
+                                ${createSelect(id, 'q1', ["فاعلة", "جيدة", "ملائمة", "محدودة", "نادرة"])}
+                                <span>.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "إدارة صفية متميزة للوقت والسلوك، والدليل انخراط الجميع في التعلم وعدم وجود وقت مهدور.",
+                            weak: "ضعف في الإدارة الصفية، ويحتاج المعلم لاستراتيجيات ضبط صف فعالة وإدارة أفضل لزمن التعلم."
+                        }
+                    },
+                    {
+                        id: 8,
+                        name: "فاعلية التدريس",
+                        desc: "توظيف استراتيجيات تدريس الفعالة.",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يوظف المعلم استراتيجيات تدريس فعالة لتعميق التعلم بمستوى</span>
+                                ${createSelect(id, 'q1', ["متميز", "ملائم", "محدود", "نادر"])}
+                                <span>.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "توظيف استراتيجيات تدريس متنوعة وجاذبة، والدليل تفاعل الطلبة الإيجابي واستيعابهم للمحتوى.",
+                            weak: "الاعتماد المفرط على التلقين، ويحتاج المعلم لتنويع استراتيجيات التدريس لتناسب أنماط التعلم المختلفة."
+                        }
+                    },
+                    {
+                        id: 9,
+                        name: "تفعيل المصادر والموارد",
+                        desc: "التقنيات الرقمية، المختبرات، الذكاء الاصطناعي.",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يفعل المعلم التقنيات بحيث يستفيد منها</span>
+                                ${createSelect(id, 'q1', ["جميع", "معظم", "أغلب", "قليل من", "قليل جدا من"])}
+                                <span>الطلبة في تعميق تعلمهم بمستوى</span>
+                                ${createSelect(id, 'q2', ["متميز", "جيد", "ملائم", "محدود", "نادر"])}
+                                <span>.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "تفعيل متميز للتقنية والمصادر التعليمية، والدليل استخدام الأدوات الرقمية بمهارة لخدمة أهداف الدرس.",
+                            weak: "عدم تفعيل الوسائل التعليمية المتاحة، ويحتاج المعلم لدمج التقنية لزيادة دافعية الطلبة."
+                        }
+                    },
+                    {
+                        id: 10,
+                        name: "التقويم ومساندة التقدم",
+                        desc: "توظيف أساليب تقويم متنوعة ومراعاة التمايز.",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يوظف أساليب تقويم تراعي التمايز بين</span>
+                                ${createSelect(id, 'q1', ["جميع", "معظم", "أغلب", "قليل من", "قليل جدا من"])}
+                                <span>الطلبة بمستوى</span>
+                                ${createSelect(id, 'q2', ["متميز", "فاعل", "ملائم", "محدود", "نادر"])}
+                                <span>.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "تنوع في أساليب التقويم (تشخيصي، بنائي، ختامي)، والدليل شمولية القياس ومراعاة الفروق الفردية.",
+                            weak: "محدودية أدوات التقويم المستخدمة، ويحتاج المعلم لتنويع الأسئلة لمراعاة مستويات الطلبة المختلفة."
+                        }
+                    }
+                ]
+            },
+            {
+                title: "القيادة والإدارة والحوكمة",
+                colorClass: "bg-purple-50 border-purple-200",
+                icon: "file-text",
+                iconColor: "text-purple-600",
+                items: [
+                    {
+                        id: 11,
+                        name: "قيادة التغيير",
+                        desc: "توظيف التقويم الذاتي والتطوير المهني في تحسين الأداء.",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يوظف تقويمه الذاتي في تحسين تعلم</span>
+                                ${createSelect(id, 'q1', ["جميع", "معظم", "أغلب", "قليل من", "قليل جدا من"])}
+                                <span>الطلبة بمستوى</span>
+                                ${createSelect(id, 'q2', ["متميز", "فاعل", "مناسب", "محدود", "نادر"])}
+                                <span>.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "وعي عالي بنقاط القوة والضعف، والدليل تقبله للملاحظات وسعيه المستمر للتطوير المهني.",
+                            weak: "يحتاج المعلم إلى تفعيل التقويم الذاتي بشكل دوري لتحسين ممارساته التدريسية."
+                        }
+                    },
+                    {
+                        id: 12,
+                        name: "الحوكمة",
+                        desc: "تطبيق السياسات والأنظمة واللوائح المنظمة للعمل.",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يطبق السياسات واللوائح بصورة</span>
+                                ${createSelect(id, 'q1', ["فعالة", "فاعلة", "مناسبة", "محدودة", "نادرة"])}
+                                <span>.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "التزام تام باللوائح والأنظمة المدرسية، والدليل انضباطه في المواعيد والمهام الموكلة إليه.",
+                            weak: "يحتاج لمزيد من الالتزام باللوائح التنظيمية والتقيد بزمن الحصة والمناوبة."
+                        }
+                    },
+                    {
+                        id: 13,
+                        name: "المبادرات التربوية",
+                        desc: "تنفيذ مبادرات وأنشطة تربوية في المجتمع المدرسي.",
+                        template: (id) => `
+                            <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
+                                <span>يقدم مبادرات</span>
+                                ${createSelect(id, 'q1', ["فعالة", "فاعلة", "ملائمة", "محدودة", "نادرة"])}
+                                <span>ويتفاعل إيجابياً في</span>
+                                ${createSelect(id, 'q2', ["جميع", "معظم", "أغلب", "بشكل محدود في", "بشكل محدود جدا في"])}
+                                <span>الأنشطة التربوية.</span>
+                            </div>
+                        `,
+                        feedback: {
+                            strong: "مبادرات تربوية فاعلة ومشاركة مجتمعية ملموسة، والدليل أثر هذه المبادرات على سلوك وتحصيل الطلبة.",
+                            weak: "ضعف في المشاركة في الأنشطة المدرسية، ويحتاج المعلم للتفاعل بشكل أكبر مع المجتمع المدرسي."
+                        }
+                    }
+                ]
+            }
+        ];
+
+        // --- Helper Functions ---
+
+        function createSelect(id, field, options) {
+            const optionsHtml = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+            return `
+                <select 
+                    data-item-id="${id}"
+                    data-field="${field}"
+                    data-save-key="select-${id}-${field}"
+                    class="save-target select-empty inline-block px-3 py-1 rounded-md border text-sm font-medium cursor-pointer transition-all focus:ring-2 focus:ring-indigo-500 outline-none"
+                    onchange="handleSelectChange(this)"
+                >
+                    <option value="" disabled selected>---</option>
+                    ${optionsHtml}
+                </select>
+            `;
+        }
+
+        function handleSelectChange(selectElement) {
+            const itemId = selectElement.getAttribute('data-item-id');
+            const field = selectElement.getAttribute('data-field');
+
+            // --- Auto-Link Feature (q1 -> q2) ---
+            if (field === 'q1') {
+                const sibling = document.querySelector(`select[data-item-id="${itemId}"][data-field="q2"]`);
+                if (sibling) {
+                    sibling.selectedIndex = selectElement.selectedIndex;
+                    
+                    if (sibling.value) {
+                        sibling.classList.remove('select-empty');
+                        sibling.classList.add('select-filled');
+                    } else {
+                        sibling.classList.remove('select-filled');
+                        sibling.classList.add('select-empty');
+                    }
+                    saveToDraft();
+                }
+            }
+
+            // 1. Visual Update
+            if (selectElement.value) {
+                selectElement.classList.remove('select-empty');
+                selectElement.classList.add('select-filled');
+            } else {
+                selectElement.classList.remove('select-filled');
+                selectElement.classList.add('select-empty');
+            }
+
+            // 2. Logic Update
+            updateRating(itemId);
+            
+            // 3. Save
+            saveToDraft();
+        }
+
+        function updateRating(itemId) {
+            const selects = document.querySelectorAll(`select[data-item-id="${itemId}"]`);
+            const ratingDisplay = document.getElementById(`rating-${itemId}`);
+            
+            let maxIndex = -1;
+            let allSelected = true;
+
+            selects.forEach(select => {
+                const index = select.selectedIndex - 1; 
+                if (index === -1) {
+                    allSelected = false;
+                } else {
+                    if (index > maxIndex) {
+                        maxIndex = index;
+                    }
+                }
+            });
+
+            if (allSelected && maxIndex !== -1) {
+                const score = maxIndex + 1;
+                
+                ratingDisplay.innerText = score;
+                ratingDisplay.className = `rating-badge w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shadow-sm transition-all ${getRatingColor(score)}`;
+
+                ratingDisplay.setAttribute('data-score', score);
+                insertAutoFeedback(itemId, score);
+
+            } else {
+                ratingDisplay.innerText = "-";
+                ratingDisplay.className = "rating-badge w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg bg-gray-100 text-gray-400 border border-gray-200";
+                ratingDisplay.removeAttribute('data-score');
+            }
+        }
+
+        function insertAutoFeedback(itemId, score) {
+            let itemData = null;
+            for (const domain of domains) {
+                const found = domain.items.find(i => i.id == itemId);
+                if (found) {
+                    itemData = found;
+                    break;
+                }
+            }
+
+            if (!itemData || !itemData.feedback) return;
+
+            const strengthArea = document.querySelector(`textarea[data-item-id="${itemId}"][data-feedback-type="strength"]`);
+            const improvementArea = document.querySelector(`textarea[data-item-id="${itemId}"][data-feedback-type="improvement"]`);
+
+            if (score <= 3) {
+                if(!strengthArea.value) {
+                    strengthArea.value = itemData.feedback.strong;
+                }
+                improvementArea.value = "";
+            } else {
+                strengthArea.value = "";
+                if(!improvementArea.value) {
+                    improvementArea.value = itemData.feedback.weak;
+                }
+            }
+        }
+
+        function generateSummary() {
+            const tableBody = document.getElementById('summary-table-body');
+            const summarySection = document.getElementById('summary-section');
+            
+            tableBody.innerHTML = '';
+            
+            let hasData = false;
+
+            domains.forEach(domain => {
+                domain.items.forEach(item => {
+                    const ratingDisplay = document.getElementById(`rating-${item.id}`);
+                    const score = ratingDisplay.getAttribute('data-score');
+                    
+                    let noteText = "";
+                    let scoreText = score || "-";
+                    
+                    if (score) {
+                        hasData = true;
+                        const scoreNum = parseInt(score);
+                        if (scoreNum <= 3) {
+                            const el = document.querySelector(`textarea[data-item-id="${item.id}"][data-feedback-type="strength"]`);
+                            noteText = el.value || "-";
+                        } else {
+                            const el = document.querySelector(`textarea[data-item-id="${item.id}"][data-feedback-type="improvement"]`);
+                            noteText = el.value || "-";
+                        }
+                    }
+
+                    const row = `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="border p-2 text-center font-bold">${item.id}</td>
+                            <td class="border p-2 font-medium">${item.name}</td>
+                            <td class="border p-2 text-center font-bold ${getRatingTextColor(score)}">${scoreText}</td>
+                            <td class="border p-2 text-gray-600">${noteText}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            });
+
+            summarySection.classList.remove('hidden');
+            summarySection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // --- Colors Helpers ---
+        function getRatingColor(score) {
+            if (score === 1) return "bg-green-600 text-white border-green-700";
+            if (score === 2) return "bg-green-100 text-green-800 border-green-300";
+            if (score === 3) return "bg-yellow-100 text-yellow-800 border-yellow-300";
+            if (score === 4) return "bg-orange-100 text-orange-800 border-orange-300";
+            return "bg-red-100 text-red-800 border-red-300";
+        }
+        
+        function getRatingTextColor(score) {
+             if (!score) return "text-gray-400";
+             const s = parseInt(score);
+             if (s === 1) return "text-green-700";
+             if (s === 2) return "text-green-600";
+             if (s === 3) return "text-yellow-600";
+             if (s === 4) return "text-orange-600";
+             return "text-red-600";
+        }
+
+        // --- Render Helpers ---
+        function createInputGroup(label, icon, type = "text", value = "", id) {
+            return `
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm font-medium text-gray-700 flex items-center gap-1">
+                        <i data-lucide="${icon}" class="w-4 h-4"></i> ${label}
+                    </label>
+                    <input 
+                        type="${type}" 
+                        value="${value}" 
+                        id="${id}"
+                        data-save-key="${id}"
+                        class="save-target border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none print:border-none print:border-b print:rounded-none print:px-0"
+                        oninput="saveToDraft()"
+                    >
+                </div>
+            `;
+        }
+
+        function createBasicSelect(label, icon, options, id) {
+            const opts = options.map(o => `<option value="${o}">${o}</option>`).join('');
+            return `
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm font-medium text-gray-700 flex items-center gap-1">
+                        <i data-lucide="${icon}" class="w-4 h-4"></i> ${label}
+                    </label>
+                    <select 
+                        id="${id}"
+                        data-save-key="${id}"
+                        class="save-target border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white print:border-none print:border-b print:rounded-none print:px-0 print:appearance-none"
+                        onchange="saveToDraft()"
+                    >
+                        <option value="" disabled selected>اختر...</option>
+                        ${opts}
+                    </select>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        //  STORAGE & HISTORY MANAGER
+        // ==========================================
+        
+        const DRAFT_KEY = 'supervisory_form_draft_v2';
+        const HISTORY_KEY = 'supervisory_visits_history';
+
+        // 1. Save to temporary draft (Auto-save)
+        function saveToDraft() {
+            const data = extractFormData();
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+            
+            // Show auto-save indicator
+            const status = document.getElementById('save-status');
+            status.style.opacity = '1';
+            setTimeout(() => { status.style.opacity = '0'; }, 2000);
+        }
+
+        function extractFormData() {
+            const data = {};
+            const elements = document.querySelectorAll('.save-target');
+            elements.forEach(el => {
+                data[el.getAttribute('data-save-key')] = el.value;
+            });
+            return data;
+        }
+
+        // 2. Load draft on startup
+        function loadDraft() {
+            const saved = localStorage.getItem(DRAFT_KEY);
+            if (saved) {
+                applyFormData(JSON.parse(saved));
+            }
+        }
+
+        function applyFormData(data) {
+            for (const key in data) {
+                const el = document.querySelector(`[data-save-key="${key}"]`);
+                if (el) {
+                    el.value = data[key];
+                    // Update visual state for Selects
+                    if (el.tagName === 'SELECT' && el.value) {
+                        el.classList.remove('select-empty');
+                        el.classList.add('select-filled');
+                    }
+                }
+            }
+            // Trigger rating updates
+            domains.forEach(domain => {
+                domain.items.forEach(item => updateRating(item.id));
+            });
+        }
+
+        // 3. Save as Permanent Visit Record
+        function saveCurrentVisit() {
+            const teacherName = document.getElementById('teacher_name').value.trim();
+            const date = document.getElementById('visit_date').value;
+
+            if (!teacherName || !date) {
+                alert('الرجاء إدخال اسم المعلم وتاريخ الزيارة للحفظ.');
+                return;
+            }
+
+            const currentData = extractFormData();
+            let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+
+            // Check if we are updating an existing visit
+            const existingId = document.getElementById('visit_id').value;
+            
+            if (existingId) {
+                // Update existing
+                const index = history.findIndex(h => h.id === existingId);
+                if (index !== -1) {
+                    history[index] = {
+                        ...history[index],
+                        teacher: teacherName,
+                        date: date,
+                        school: document.getElementById('school_name').value,
+                        data: currentData,
+                        lastUpdated: new Date().toISOString()
+                    };
+                    alert('تم تحديث بيانات الزيارة بنجاح.');
+                }
+            } else {
+                // Create New
+                const newId = Date.now().toString(); // Simple ID
+                const newRecord = {
+                    id: newId,
+                    teacher: teacherName,
+                    date: date,
+                    school: document.getElementById('school_name').value,
+                    data: currentData,
+                    created: new Date().toISOString()
+                };
+                history.push(newRecord);
+                
+                // Set the ID in the form so subsequent saves update this record
+                document.getElementById('visit_id').value = newId;
+                // Update draft to include the ID
+                saveToDraft();
+                
+                alert('تم حفظ الزيارة في السجل بنجاح.');
+            }
+
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+        }
+
+        // 4. Create New Visit (Reset)
+        function createNewVisit() {
+            if (confirm('هل أنت متأكد من بدء زيارة جديدة؟ سيتم مسح الحقول الحالية (تأكد من حفظ الزيارة السابقة أولاً).')) {
+                // Clear form inputs manually
+                document.querySelectorAll('.save-target').forEach(el => {
+                    // Keep school name as default if preferred, but usually reset all except school
+                    if(el.id === 'school_name') return; 
+                    el.value = '';
+                    if(el.tagName === 'SELECT') {
+                        el.classList.remove('select-filled');
+                        el.classList.add('select-empty');
+                    }
+                });
+                
+                // Clear Ratings
+                domains.forEach(domain => {
+                    domain.items.forEach(item => updateRating(item.id));
+                });
+                
+                // Clear ID
+                document.getElementById('visit_id').value = '';
+
+                // Clear Draft
+                localStorage.removeItem(DRAFT_KEY);
+                saveToDraft(); // Save empty state
+            }
+        }
+
+        // 5. History UI & Logic
+        function toggleHistoryModal() {
+            const modal = document.getElementById('history-modal');
+            const isOpen = !modal.classList.contains('hidden');
+            
+            if (!isOpen) {
+                renderHistoryList();
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function renderHistoryList() {
+            const container = document.getElementById('history-list-container');
+            const emptyMsg = document.getElementById('empty-history-msg');
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            
+            container.innerHTML = '';
+            
+            if (history.length === 0) {
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+            
+            emptyMsg.classList.add('hidden');
+
+            // Sort by latest first
+            history.sort((a, b) => new Date(b.created) - new Date(a.created));
+
+            history.forEach(visit => {
+                const el = document.createElement('div');
+                el.className = "bg-white p-4 rounded-lg border shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row justify-between items-center gap-4";
+                
+                el.innerHTML = `
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+                            <i data-lucide="user"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">${visit.teacher || 'بدون اسم'}</h4>
+                            <div class="text-xs text-gray-500 flex items-center gap-2">
+                                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${visit.date || 'بدون تاريخ'}</span>
+                                <span class="hidden sm:inline">|</span>
+                                <span>${visit.school}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button onclick="loadVisit('${visit.id}')" class="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-2 rounded text-sm font-medium transition-colors">
+                            <i data-lucide="folder-open" class="w-4 h-4"></i> فتح
+                        </button>
+                        <button onclick="deleteVisit('${visit.id}')" class="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded text-sm font-medium transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i> حذف
+                        </button>
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+            
+            lucide.createIcons();
+        }
+
+        function loadVisit(id) {
+            if (confirm('هل تريد فتح هذه الزيارة للتعديل؟ سيتم استبدال البيانات الحالية.')) {
+                const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                const visit = history.find(v => v.id === id);
+                
+                if (visit) {
+                    // Apply data
+                    applyFormData(visit.data);
+                    
+                    // Ensure ID is set so saves update this record
+                    const idField = document.getElementById('visit_id');
+                    if(idField) idField.value = id;
+                    
+                    // Save to draft so it persists on reload
+                    saveToDraft();
+                    
+                    toggleHistoryModal(); // Close modal
+                }
+            }
+        }
+
+        function deleteVisit(id) {
+            if (confirm('هل أنت متأكد من حذف هذا السجل نهائياً؟')) {
+                let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                history = history.filter(v => v.id !== id);
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+                renderHistoryList(); // Refresh list
+                
+                // If current open visit is the deleted one, clear ID to prevent update error
+                if (document.getElementById('visit_id').value === id) {
+                    document.getElementById('visit_id').value = '';
+                }
+            }
+        }
+
+        function renderApp() {
+            // Data for Dropdowns
+            const grades = ["الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر", "الحادي عشر", "الثاني عشر"];
+            const periods = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة", "الثامنة"];
+
+            // Render Basic Info
+            const basicInfoContainer = document.getElementById('basic-info-container');
+            basicInfoContainer.innerHTML = `
+                ${createInputGroup('اسم المدرسة', 'school', 'text', 'مدرسة بلال بن رباح', 'school_name')}
+                ${createInputGroup('اسم المعلم', 'user', 'text', '', 'teacher_name')}
+                ${createInputGroup('التاريخ', 'calendar', 'date', '', 'visit_date')}
+                ${createBasicSelect('الصف', 'book-open', grades, 'class_grade')}
+                ${createBasicSelect('الحصة', 'clock', periods, 'class_period')}
+                ${createInputGroup('عنوان الدرس', 'file-text', 'text', '', 'lesson_title')}
+            `;
+
+            // Render Domains
+            const domainsContainer = document.getElementById('domains-container');
+            const domainsHtml = domains.map(domain => `
+                <div class="rounded-xl border shadow-sm overflow-hidden print:shadow-none print:border-gray-300 print:break-inside-avoid ${domain.colorClass}">
+                    <div class="p-4 border-b border-opacity-20 border-gray-400 flex items-center gap-2 bg-white bg-opacity-50">
+                        <i data-lucide="${domain.icon}" class="${domain.iconColor} w-6 h-6"></i>
+                        <h2 class="font-bold text-lg text-gray-800">${domain.title}</h2>
+                    </div>
+                    
+                    <div class="divide-y divide-gray-200 bg-white">
+                        ${domain.items.map(item => `
+                            <div class="p-6 print:p-4 hover:bg-gray-50 transition-colors">
+                                <div class="flex flex-col md:flex-row gap-4 items-start mb-4">
+                                    
+                                    <!-- ID & Title -->
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="bg-gray-800 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full">
+                                                ${item.id}
+                                            </span>
+                                            <h3 class="font-bold text-gray-900">${item.name}</h3>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mr-8 mb-3">${item.desc}</p>
+                                        
+                                        <!-- Sentence Builder -->
+                                        <div class="bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300 mr-8 print:bg-transparent print:border-none print:p-0">
+                                            ${item.template(item.id)}
+                                        </div>
+                                    </div>
+
+                                    <!-- Auto Rating Box -->
+                                    <div class="flex flex-col items-center gap-1 min-w-[80px]">
+                                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">التقدير</span>
+                                        <div id="rating-${item.id}" class="rating-badge w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg bg-gray-100 text-gray-400 border border-gray-200">
+                                            -
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Feedback Areas -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mr-8 mt-4 print:mt-2">
+                                    <div class="flex-1">
+                                        <label class="text-xs font-bold mb-1 flex items-center gap-1 text-green-700">
+                                            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> جوانب الإجادة وأدلتها
+                                        </label>
+                                        <textarea 
+                                            data-item-id="${item.id}"
+                                            data-feedback-type="strength"
+                                            data-save-key="fb-${item.id}-strength"
+                                            class="save-target w-full rounded-md border p-2 text-sm outline-none focus:ring-1 bg-green-50 border-green-100 text-green-800 focus:ring-green-500" 
+                                            rows="2" 
+                                            placeholder="اكتب ملاحظاتك هنا..."
+                                            oninput="saveToDraft()"
+                                        ></textarea>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="text-xs font-bold mb-1 flex items-center gap-1 text-red-700">
+                                            <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> الجوانب التي تحتاج إلى تطوير
+                                        </label>
+                                        <textarea 
+                                            data-item-id="${item.id}"
+                                            data-feedback-type="improvement"
+                                            data-save-key="fb-${item.id}-improvement"
+                                            class="save-target w-full rounded-md border p-2 text-sm outline-none focus:ring-1 bg-red-50 border-red-100 text-red-800 focus:ring-red-500" 
+                                            rows="2" 
+                                            placeholder="اكتب ملاحظاتك هنا..."
+                                            oninput="saveToDraft()"
+                                        ></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            domainsContainer.innerHTML = domainsHtml;
+
+            // Initialize Icons
+            lucide.createIcons();
+            
+            // LOAD DRAFT AFTER RENDER
+            loadDraft();
+        }
+
+        // Initialize App
+        renderApp();
+    </script>
+</body>
+</html>
