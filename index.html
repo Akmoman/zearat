@@ -124,27 +124,43 @@
             </div>
             
             <!-- Actions Toolbar -->
-            <div class="flex flex-wrap gap-2 print-hidden">
-                <button onclick="createNewVisit()" class="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg transition-colors text-sm font-medium">
+            <div class="flex flex-wrap gap-2 print-hidden items-center">
+                <!-- Hidden File Input for Import -->
+                <input type="file" id="import-file" class="hidden" accept=".json" onchange="handleFileImport(this)">
+
+                <button onclick="createNewVisit()" class="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg transition-colors text-sm font-medium" title="مسح الحقول لبدء زيارة جديدة">
                     <i data-lucide="plus-circle" class="w-4 h-4 text-indigo-600"></i>
-                    <span>زيارة جديدة</span>
+                    <span class="hidden md:inline">جديد</span>
                 </button>
 
-                <button onclick="saveCurrentVisit()" class="flex items-center gap-2 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg transition-colors text-sm font-medium">
+                <button onclick="saveCurrentVisit()" class="flex items-center gap-2 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg transition-colors text-sm font-medium" title="حفظ الزيارة الحالية في السجل">
                     <i data-lucide="save" class="w-4 h-4"></i>
-                    <span>حفظ الزيارة</span>
+                    <span class="hidden md:inline">حفظ</span>
                 </button>
 
-                <button onclick="toggleHistoryModal()" class="flex items-center gap-2 bg-gray-800 hover:bg-gray-900 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">
+                <button onclick="toggleHistoryModal()" class="flex items-center gap-2 bg-gray-800 hover:bg-gray-900 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium" title="عرض الزيارات السابقة">
                     <i data-lucide="history" class="w-4 h-4"></i>
-                    <span>سجل الزيارات</span>
+                    <span class="hidden md:inline">السجل</span>
                 </button>
                 
-                <div class="w-px h-8 bg-gray-300 mx-1 hidden sm:block"></div>
+                <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+                <!-- Database Management Buttons -->
+                <button onclick="exportDatabase()" class="flex items-center gap-2 bg-orange-50 border border-orange-200 hover:bg-orange-100 text-orange-700 px-3 py-2 rounded-lg transition-colors text-sm font-medium" title="تصدير قاعدة البيانات لملف">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span class="hidden md:inline">تصدير</span>
+                </button>
+
+                <button onclick="document.getElementById('import-file').click()" class="flex items-center gap-2 bg-orange-50 border border-orange-200 hover:bg-orange-100 text-orange-700 px-3 py-2 rounded-lg transition-colors text-sm font-medium" title="استيراد قاعدة البيانات من ملف">
+                    <i data-lucide="upload" class="w-4 h-4"></i>
+                    <span class="hidden md:inline">استيراد</span>
+                </button>
+
+                <div class="w-px h-6 bg-gray-300 mx-1 hidden sm:block"></div>
 
                 <button onclick="generateSummary()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">
                     <i data-lucide="table" class="w-4 h-4"></i>
-                    <span class="hidden sm:inline">التقرير التجميعي</span>
+                    <span class="hidden sm:inline">التقرير</span>
                 </button>
                 <button onclick="window.print()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">
                     <i data-lucide="printer" class="w-4 h-4"></i>
@@ -967,6 +983,75 @@
                     document.getElementById('visit_id').value = '';
                 }
             }
+        }
+
+        // ==========================================
+        //  DATABASE IMPORT/EXPORT
+        // ==========================================
+
+        function exportDatabase() {
+            // Get all necessary data
+            const history = localStorage.getItem(HISTORY_KEY);
+            const draft = localStorage.getItem(DRAFT_KEY);
+            
+            // Construct backup object
+            const data = {
+                type: 'supervisory_backup',
+                version: 1,
+                date: new Date().toISOString(),
+                history: history ? JSON.parse(history) : [],
+                draft: draft ? JSON.parse(draft) : {}
+            };
+
+            // Create Blob and Link
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `supervisory_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function handleFileImport(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // Basic validation
+                    if (!data.history && !data.draft) {
+                        throw new Error("Invalid format");
+                    }
+
+                    if (confirm(`هل أنت متأكد من استيراد قاعدة البيانات؟\nسيتم استبدال ${data.history ? data.history.length : 0} زيارة سابقة.\nهذا الإجراء لا يمكن التراجع عنه.`)) {
+                        
+                        // Import History
+                        if (data.history) {
+                            localStorage.setItem(HISTORY_KEY, JSON.stringify(data.history));
+                        }
+                        
+                        // Import Draft (Optional: Ask user? For simplicity, we just import if it exists)
+                        if (data.draft) {
+                            localStorage.setItem(DRAFT_KEY, JSON.stringify(data.draft));
+                        }
+                        
+                        alert('تم استعادة البيانات بنجاح! سيتم إعادة تحميل الصفحة.');
+                        location.reload();
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('خطأ: ملف البيانات غير صالح أو تالف.');
+                }
+                // Reset input
+                input.value = '';
+            };
+            reader.readAsText(file);
         }
 
         function renderApp() {
