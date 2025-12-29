@@ -277,6 +277,10 @@
                         id: 1,
                         name: "التحصيل الدراسي",
                         desc: "تحصيل الطلبة في الأعمال الصفية وغير الصفية.",
+                        questions: [
+                            "هل يكتسب الطلبة المهارات الأساسية والمعارف؟",
+                            "هل هناك عدالة في التحصيل بين الطلبة؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يكتسب</span>
@@ -295,6 +299,10 @@
                         id: 2,
                         name: "التقدم الدراسي",
                         desc: "التقدم الدراسي للطلبة بما فيهم الطلبة ذوي الإعاقة.",
+                        questions: [
+                            "هل يتحسن المستوى التحصيلي للطلبة بمرور الوقت؟",
+                            "هل يحرز الطلبة تقدماً في الحصة (فردياً وجماعياً)؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يتقدم</span>
@@ -313,6 +321,11 @@
                         id: 3,
                         name: "مهارات التعلم",
                         desc: "تطبيق مهارات التعلم (الذاتي – التعاوني – الرقمي – التفكير العليا).",
+                        questions: [
+                            "هل يطبق الطلبة مهارات التعلم الذاتي والتعاوني؟",
+                            "هل يوظف الطلبة المهارات الرقمية؟",
+                            "هل يمارس الطلبة التفكير الناقد وحل المشكلات؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يطبق</span>
@@ -339,6 +352,11 @@
                         id: 4,
                         name: "القيم والسلوك",
                         desc: "تمسك الطلبة بالهوية العمانية والقيم الإنسانية.",
+                        questions: [
+                            "هل يعتز الطلبة بالهوية العمانية والانتماء؟",
+                            "هل يدرك الطلبة حقوقهم وواجباتهم؟",
+                            "هل يلتزم الطلبة بالقيم الإنسانية المشتركة؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يلتزم</span>
@@ -365,6 +383,10 @@
                         id: 5,
                         name: "جودة بيئة التعلم",
                         desc: "متابعة جوانب الأمن والسلامة والنظافة في بيئة التعلم.",
+                        questions: [
+                            "هل يتابع المعلم جوانب الأمن والسلامة؟",
+                            "هل يهتم المعلم بنظافة بيئة التعلم؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يتابع المعلم جوانب الأمن والسلامة والنظافة بصورة</span>
@@ -389,6 +411,10 @@
                         id: 6,
                         name: "تخطيط المنهاج الدراسي",
                         desc: "تخطيط المناهج الدراسي لتحقيق نواتج التعلم.",
+                        questions: [
+                            "هل يتوافق التخطيط مع الخطة الفصلية؟",
+                            "هل تتنوع الأهداف واستراتيجيات التدريس والتقويم؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يخطط المعلم لجميع دروسه متسلسلاً ومحققاً لنواتج التعلم بصورة</span>
@@ -405,6 +431,11 @@
                         id: 7,
                         name: "إدارة الصف",
                         desc: "فاعلية الإدارة الصفية (إدارة الزمن، السلوك، الدافعية).",
+                        questions: [
+                            "هل يدير المعلم زمن التعلم بفاعلية؟",
+                            "هل يدير المعلم سلوك الطلبة بتمكن؟",
+                            "هل يثير المعلم دافعية الطلبة للتعلم؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يدير المعلم زمن التعلم وسلوك طلبته ويثير دافعيتهم بصورة</span>
@@ -421,6 +452,10 @@
                         id: 8,
                         name: "فاعلية التدريس",
                         desc: "توظيف استراتيجيات تدريس الفعالة.",
+                        questions: [
+                            "هل يوظف المعلم استراتيجيات تدريس فعالة؟",
+                            "هل يستفيد جميع الطلبة من الاستراتيجيات في تعميق تعلمهم؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يوظف المعلم استراتيجيات تدريس فعالة لتعميق التعلم بمستوى</span>
@@ -437,6 +472,10 @@
                         id: 9,
                         name: "تفعيل المصادر والموارد",
                         desc: "التقنيات الرقمية، المختبرات، الذكاء الاصطناعي.",
+                        questions: [
+                            "هل يفعل المعلم المنصات والسبورات التفاعلية؟",
+                            "هل يستخدم المختبرات ومصادر التعلم والذكاء الاصطناعي؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يفعل المعلم التقنيات بحيث يستفيد منها</span>
@@ -455,6 +494,11 @@
                         id: 10,
                         name: "التقويم ومساندة التقدم",
                         desc: "توظيف أساليب تقويم متنوعة ومراعاة التمايز.",
+                        questions: [
+                            "هل تراعي أساليب التقويم التمايز بين الطلبة؟",
+                            "هل تستند التقييمات إلى المعايير المعتمدة؟",
+                            "هل يوظف المعلم نتائج التقويم في دعم التعلم؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يوظف أساليب تقويم تراعي التمايز بين</span>
@@ -481,6 +525,10 @@
                         id: 11,
                         name: "قيادة التغيير",
                         desc: "توظيف التقويم الذاتي والتطوير المهني في تحسين الأداء.",
+                        questions: [
+                            "هل يجري المعلم تقويماً ذاتياً لأدائه؟",
+                            "هل يوظف التطوير المهني في تحسين الأداء؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يوظف تقويمه الذاتي في تحسين تعلم</span>
@@ -499,6 +547,9 @@
                         id: 12,
                         name: "الحوكمة",
                         desc: "تطبيق السياسات والأنظمة واللوائح المنظمة للعمل.",
+                        questions: [
+                            "هل يطبق المعلم السياسات والأنظمة واللوائح المنظمة للعمل؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يطبق السياسات واللوائح بصورة</span>
@@ -515,6 +566,10 @@
                         id: 13,
                         name: "المبادرات التربوية",
                         desc: "تنفيذ مبادرات وأنشطة تربوية في المجتمع المدرسي.",
+                        questions: [
+                            "هل يقدم المعلم مبادرات تربوية ذات أثر؟",
+                            "هل يتفاعل إيجابياً مع الأنشطة التربوية والمجتمع المحلي؟"
+                        ],
                         template: (id) => `
                             <div class="flex flex-wrap items-center gap-2 text-gray-700 leading-8">
                                 <span>يقدم مبادرات</span>
@@ -1094,6 +1149,16 @@
                                         </div>
                                         <p class="text-sm text-gray-500 mr-8 mb-3">${item.desc}</p>
                                         
+                                        <!-- Indicators List -->
+                                        ${item.questions && item.questions.length > 0 ? `
+                                        <div class="mb-4">
+                                            <p class="text-xs font-bold text-gray-600 mb-1">مؤشرات الأداء:</p>
+                                            <ul class="list-disc list-inside text-xs text-gray-500 space-y-1">
+                                                ${item.questions.map(q => `<li>${q}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                        ` : ''}
+
                                         <!-- Sentence Builder -->
                                         <div class="bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300 mr-8 print:bg-transparent print:border-none print:p-0">
                                             ${item.template(item.id)}
